@@ -39,3 +39,6 @@ out/
 # 환경 변수 및 개인 비밀 키 파일 (나중에 4~5일차에 JWT secret key 등 관리용)
 *.env
 application-local.yml
+
+# macOS
+.DS_Store
