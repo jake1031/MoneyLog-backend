@@ -1,41 +1,64 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
+@Table(name="users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @NotNull
+    @Column(length = 255, nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @NotNull
+    @Column(length = 255, nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String name;
+    @NotNull
+    @Column(length = 50, nullable = false)
+    private String nickname;
 
+    @NotNull
+    @CreatedDate // 엔티티가 생성될 때 현재 시간이 자동으로 들어감
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    public User(String email, String encodedPassword, String nickname) {
+        this.email = email;
+        this.password = encodedPassword;
+        this.nickname = nickname;
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
