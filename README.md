@@ -21,3 +21,10 @@
     - Jackson 직렬화 시 DTO `@Getter` 누락으로 인한 빈 객체(`{}`) 응답 현상 수정
 
 ---
+
+### 🟢 3일차: JWT 인증·인가 및 월별 통계 API 구현
+- [x] **Spring Security & JWT 적용:** BCrypt를 활용한 비밀번호 암호화 및 회원가입/로그인(accessToken 발급) 기능 구현
+- [x] **데이터 접근 제어 (인가):** JWT 토큰에서 추출한 `user_id`를 기반으로 본인 데이터만 조회하고 조작할 수 있도록 권한 분리
+- [x] **월별 통계 API 구현:** 인증된 사용자의 특정 연월(Year-Month) 기준 총수입, 총지출, 잔액 합계 조회 기능 완성
+- [x] **API 응답 표준화 및 문서화:** `{success, code, message, data}` 형태의 공통 응답 봉투(Envelope) 적용, Swagger UI에 JWT 인증(Authorize) 버튼 연동
+- [x] **보안 강화 및 설정 정리:** `dotenv-java`를 도입하여 JWT Secret Key를 `.env` 파일로 분리 및 `.gitignore` 적용, 불필요해진 더미 데이터용 `data.sql` 파일 삭제
