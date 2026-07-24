@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
 	// 1. 핵심 Web & JPA
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'    // REST API 구축, HTTP 요청 handling, MVC 기본
+	implementation 'org.springframework.boot:spring-boot-starter-web'    // REST API 구축, HTTP 요청 handling
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'   // Spring Data JPA / Hibernate (ORM 데이터베이스 연동)
 
 	// 2. 보안 & 데이터 검증 (3일차 핵심)
@@ -35,7 +35,6 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'                          // 컴파일 시점 Lombok 어노테이션 프로세서
 
 	// 5. 테스트 전용 의존성 (컴파일/빌드 시에는 제외)
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'   // Controller 테스트
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'  // Repository/JPA 테스트
 	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'  // Security 인증 테스트
 	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'// Validation 테스트
