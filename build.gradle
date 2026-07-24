@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.1.0'
+	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -18,21 +18,39 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-h2console'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testCompileOnly 'org.projectlombok:lombok'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testAnnotationProcessor 'org.projectlombok:lombok'
+	// 1. 핵심 Web & JPA
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'    // REST API 구축, HTTP 요청 handling, MVC 기본
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'   // Spring Data JPA / Hibernate (ORM 데이터베이스 연동)
+
+	// 2. 보안 & 데이터 검증 (3일차 핵심)
+	implementation 'org.springframework.boot:spring-boot-starter-security'   // 인증/인가 처리 (비밀번호 암호화, JWT 필터링 등)
+	implementation 'org.springframework.boot:spring-boot-starter-validation' // DTO 입력값 검증 (@NotNull, @Positive 등)
+
+	// 3. 데이터베이스 (In-Memory H2)
+	runtimeOnly 'com.h2database:h2'                                         // 로컬 테스트용 H2 DB 드라이버
+	implementation 'org.springframework.boot:spring-boot-h2console'         // Web H2 콘솔 화면 지원
+
+	// 4. 생산성 도구 (Lombok)
+	compileOnly 'org.projectlombok:lombok'                                  // @Getter, @Builder 등 보일러플레이트 코드 자동 생성
+	annotationProcessor 'org.projectlombok:lombok'                          // 컴파일 시점 Lombok 어노테이션 프로세서
+
+	// 5. 테스트 전용 의존성 (컴파일/빌드 시에는 제외)
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'   // Controller 테스트
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'  // Repository/JPA 테스트
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'  // Security 인증 테스트
+	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'// Validation 테스트
+
+	testCompileOnly 'org.projectlombok:lombok'                              // 테스트 코드용 Lombok
+	testAnnotationProcessor 'org.projectlombok:lombok'                      // 테스트 코드용 Lombok 프로세서
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'             // JUnit5 테스트 실행기
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Swagger (Spring Boot 3.x 기준)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 }
 
 tasks.named('test') {
