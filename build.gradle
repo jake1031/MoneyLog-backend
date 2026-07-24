@@ -50,7 +50,7 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 
 	// 8. dotenv-java
-	implementation 'io.github.cdimascio:dotenv-java:4.0.0'
+	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 }
 
 tasks.named('test') {
