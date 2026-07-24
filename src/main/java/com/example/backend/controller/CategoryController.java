@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 
 @RestController
@@ -17,7 +18,6 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
-    private final Long userId = 1L;
 
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
@@ -26,8 +26,8 @@ public class CategoryController {
     // [POST] 카테고리 생성
     @PostMapping
     public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody CategoryRequestDto requestDto) {
-
         CategoryResponseDto response = categoryService.createCategory(userId, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("카테고리 생성에 성공했습니다.", response));
@@ -35,7 +35,9 @@ public class CategoryController {
 
     // [GET] 카테고리 목록 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponseDto>>> getCategories() {
+    public ResponseEntity<ApiResponse<List<CategoryResponseDto>>> getCategories(
+            @AuthenticationPrincipal Long userId
+            ) {
 
         List<CategoryResponseDto> categories = categoryService.getCategories(userId);
         return ResponseEntity.ok(ApiResponse.success("카테고리 목록 조회에 성공했습니다.", categories));
@@ -44,6 +46,7 @@ public class CategoryController {
     // [PUT] 카테고리 수정
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(
+            @AuthenticationPrincipal Long userId,
             @PathVariable("id") Long categoryId,
             @Valid @RequestBody CategoryRequestDto requestDto) {
 
@@ -54,6 +57,7 @@ public class CategoryController {
     // [DELETE] 카테고리 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(
+            @AuthenticationPrincipal Long userId,
             @PathVariable("id") Long categoryId) {
 
         categoryService.deleteCategory(userId, categoryId);

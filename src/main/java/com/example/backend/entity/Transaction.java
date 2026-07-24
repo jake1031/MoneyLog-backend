@@ -76,6 +76,14 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
+    public void update(Long categoryId, CategoryType type, Long amount, String description, LocalDate transactionDate) {
+        this.categoryId = categoryId;
+        this.type = type;
+        this.amount = amount;
+        this.description = description;
+        this.transactionDate = transactionDate;
+    }
+
     // === Getter ===
     public Long getId() { return id; }
     public Long getUserId() { return userId; }

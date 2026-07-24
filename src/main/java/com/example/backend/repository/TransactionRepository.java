@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
@@ -23,6 +24,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     // 특정 유저의 기간별 거래 내역 페이징 조회
     Page<Transaction> findByUserIdAndTransactionDateBetween(
             Long userId, LocalDate startDate, LocalDate endDate, Pageable pageable);
+
+    // 단건 수정/삭제/조회 시 남의 가계부 데이터 접근 방지용
+    Optional<Transaction> findByIdAndUserId(Long id, Long userId);
 
     // 1. 특정 기간 & 타입(INCOME/EXPENSE)의 총금액 합계 (결과가 없을 경우 NULL 대신 0 반환)
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
