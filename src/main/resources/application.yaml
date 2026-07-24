@@ -21,6 +21,16 @@ spring:
       hibernate:
         format_sql: true # 👈 출력되는 SQL 쿼리를 보기 좋게 정렬
     defer-datasource-initialization: true
-  sql:
-    init:
-      mode: always
+
+# 🔑 JWT 설정 추가 (JwtProvider에서 사용하는 키 이름과 맞춰주세요)
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000 # 토큰 만료 시간 (예: 24시간 = 86400000 ms)
+
+  springdoc:
+    swagger-ui:
+      path: /swagger-ui.html
+      disable-swagger-default-url: true
+      display-request-duration: true
+    api-docs:
+      path: /v3/api-docs
