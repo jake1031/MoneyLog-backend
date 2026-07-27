@@ -30,7 +30,8 @@ spring:
     defer-datasource-initialization: true
 
 jwt:
-  secret: ${JWT_SECRET}
+  # 32자 이상의 기본값을 부여하여 환경변수가 없어도 테스트/로컬이 터지지 않게 수정
+  secret: ${JWT_SECRET:moneylog-jwt-secret-key-for-test-environment-must-be-very-long-32bytes}
   expiration: 86400000
 
 springdoc:
