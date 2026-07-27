@@ -2,123 +2,264 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>MoneyLog - 가계부</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moneylog - 서비스 시작하기</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 0 10px; }
-        .box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 6px; }
-        input, select, button { margin: 5px 0; padding: 8px; width: 100%; box-sizing: border-box; }
-        button { background-color: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+            padding: 32px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            margin-bottom: -2px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .message {
+            margin-top: 16px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .message.error { color: #dc2626; }
+        .message.success { color: #16a34a; }
+
         .hidden { display: none; }
     </style>
 </head>
 <body>
-<h2>💰 MoneyLog 간이 대시보드</h2>
 
-<!-- 1. 로그인 폼 -->
-<div id="login-section" class="box">
-    <h3>로그인</h3>
-    <input type="email" id="login-email" placeholder="이메일 (예: test@test.com)">
-    <input type="password" id="login-password" placeholder="비밀번호">
-    <button onclick="login()">로그인하기</button>
-</div>
+<div class="card">
+    <div class="title">MoneyLog 💸</div>
 
-<!-- 2. 메인 서비스 영역 (로그인 후 표시) -->
-<div id="main-section" class="box hidden">
-    <h3>거래 내역 추가</h3>
-    <select id="tx-type">
-        <option value="EXPENSE">지출</option>
-        <option value="INCOME">수입</option>
-    </select>
-    <input type="number" id="tx-amount" placeholder="금액 (원)">
-    <input type="number" id="tx-category" placeholder="카테고리 ID (예: 1)">
-    <input type="text" id="tx-desc" placeholder="내용 (선택)">
-    <input type="date" id="tx-date">
-    <button onclick="createTransaction()">등록하기</button>
+    <!-- 탭 버튼 -->
+    <div class="tabs">
+        <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">로그인</button>
+        <button class="tab-btn" id="signupTab" onclick="switchTab('signup')">회원가입</button>
+    </div>
 
-    <h3>거래 내역 목록</h3>
-    <button onclick="fetchMonthlyStats()" style="background-color: #007bff;">목록/통계 새로고침</button>
-    <table>
-        <thead>
-        <tr><th>날짜</th><th>유형</th><th>금액</th><th>카테고리</th><th>내용</th></tr>
-        </thead>
-        <tbody id="tx-list"></tbody>
-    </table>
+    <!-- 로그인 폼 -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+            <label for="loginEmail">이메일</label>
+            <input type="email" id="loginEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">비밀번호</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="submit-btn">로그인</button>
+    </form>
+
+    <!-- 회원가입 폼 -->
+    <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
+        <div class="form-group">
+            <label for="signupName">이름</label>
+            <input type="text" id="signupName" placeholder="홍길동" required>
+        </div>
+        <div class="form-group">
+            <label for="signupEmail">이메일</label>
+            <input type="email" id="signupEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+            <label for="signupPassword">비밀번호</label>
+            <input type="password" id="signupPassword" placeholder="8자 이상 입력" required>
+        </div>
+        <button type="submit" class="submit-btn">가입하기</button>
+    </form>
+
+    <div id="message" class="message"></div>
 </div>
 
 <script>
-    let token = localStorage.getItem('accessToken') || '';
+    // 탭 전환
+    function switchTab(tab) {
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const message = document.getElementById('message');
 
-    if(token) showMain();
+        message.textContent = ''; // 메시지 초기화
 
-    async function login() {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const result = await res.json();
-        if(result.success) {
-            token = result.data.accessToken;
-            localStorage.setItem('accessToken', token);
-            showMain();
+        if (tab === 'login') {
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
         } else {
-            alert('로그인 실패: ' + result.message);
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            loginTab.classList.remove('active');
+            signupTab.classList.add('active');
         }
     }
 
-    function showMain() {
-        document.getElementById('login-section').classList.add('hidden');
-        document.getElementById('main-section').classList.remove('hidden');
-        document.getElementById('tx-date').valueAsDate = new Date();
-        fetchMonthlyStats();
-    }
+    // 로그인 API 호출
+    async function handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const message = document.getElementById('message');
 
-    async function createTransaction() {
-        const payload = {
-            type: document.getElementById('tx-type').value,
-            amount: parseInt(document.getElementById('tx-amount').value),
-            categoryId: parseInt(document.getElementById('tx-category').value),
-            description: document.getElementById('tx-desc').value,
-            transactionDate: document.getElementById('tx-date').value
-        };
-        const res = await fetch('/api/transactions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        if(result.success) {
-            alert('등록 완료!');
-            fetchMonthlyStats();
-        } else {
-            alert('등록 실패: ' + result.message);
-        }
-    }
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-    async function fetchMonthlyStats() {
-        const ym = new Date().toISOString().slice(0,7);
-        const res = await fetch(`/api/statistics/monthly?yearMonth=${ym}`, {
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const result = await res.json();
-        if(result.success) {
-            const tbody = document.getElementById('tx-list');
-            tbody.innerHTML = '';
-            // 간이 목록 표출
-            if(result.data.categoryStats) {
-                result.data.categoryStats.forEach(item => {
-                    tbody.innerHTML += `<tr><td>${ym}</td><td>-</td><td>${item.amount}원</td><td>${item.categoryName}</td><td>${item.percentage}%</td></tr>`;
-                });
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // 백엔드 응답 구조(result.data.accessToken)에 정확히 접근!
+                const token = result.data?.accessToken;
+
+                if (token) {
+                    localStorage.setItem('accessToken', token);
+
+                    message.className = 'message success';
+                    message.textContent = '로그인 성공! 대시보드로 이동합니다...';
+
+                    // 1초 뒤 대시보드로 이동
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1000);
+                } else {
+                    message.className = 'message error';
+                    message.textContent = '토큰 정보를 가져오지 못했습니다.';
+                }
+            } else {
+                message.className = 'message error';
+                message.textContent = result.message || '로그인에 실패했습니다.';
             }
+        } catch (err) {
+            message.className = 'message error';
+            message.textContent = '서버 통신 오류가 발생했습니다.';
+        }
+    }
+
+    // 회원가입 API 호출
+    async function handleSignup(e) {
+        e.preventDefault();
+        const name = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const message = document.getElementById('message');
+
+        try {
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                message.className = 'message success';
+                message.textContent = '회원가입 완료! 로그인해 주세요.';
+                setTimeout(() => switchTab('login'), 1500); // 1.5초 뒤 로그인 탭으로 이동
+            } else {
+                message.className = 'message error';
+                message.textContent = data.message || '회원가입에 실패했습니다.';
+            }
+        } catch (err) {
+            message.className = 'message error';
+            message.textContent = '서버 통신 오류가 발생했습니다.';
         }
     }
 </script>
+
 </body>
 </html>

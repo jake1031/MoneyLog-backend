@@ -55,7 +55,7 @@ public class AuthService {
         }
 
         // 3. JWT 토큰 생성 및 반환
-        String accessToken = jwtProvider.createAccessToken(user.getId());
+        String accessToken = jwtProvider.createAccessToken(user.getId(), user.getNickname());
         return new TokenResponseDto(accessToken);
     }
 }

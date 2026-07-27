@@ -12,6 +12,10 @@ import com.example.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional(readOnly = true)
 public class TransactionService {
@@ -29,15 +33,13 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionResponseDto createTransaction(Long userId, TransactionRequestDto request) { // ★ userId 파라미터 추가
-        // 1. 유저 존재 여부 확인 (필요 시 SecurityContext로 대체 가능하나 유효성 검증용)
+    public TransactionResponseDto createTransaction(Long userId, TransactionRequestDto request) {
         if (!userRepository.existsById(userId)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED); //
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        // 2. 카테고리 존재 여부 확인
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND)); //[cite: 1, 2]
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Transaction transaction = new Transaction(
                 userId,
@@ -53,19 +55,18 @@ public class TransactionService {
         return new TransactionResponseDto(savedTransaction, category.getName());
     }
 
-    // ★ [참고] 수정/삭제/단건 조회 메서드 작성 시 패턴
+    // ★ 1. 수정 메서드
     @Transactional
     public TransactionResponseDto updateTransaction(Long userId, Long transactionId, TransactionRequestDto request) {
-        // 1. 본인의 거래 내역 조회 (없으면 예외)
+        // 본인 거래 내역 확인
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
 
-        // 2. 카테고리 존재 여부 확인 및 엔티티 조회
+        // 카테고리 확인
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
-        // 3. 더티 체킹(Dirty Checking)을 활용한 데이터 수정
-        // (엔티티의 필드값만 바꾸면 @Transactional에 의해 메서드 종료 시 자동 UPDATE 실행됨)
+        // 더티 체킹을 통한 수정
         transaction.update(
                 category.getId(),
                 category.getType(),
@@ -74,7 +75,31 @@ public class TransactionService {
                 request.getTransactionDate()
         );
 
-        // save()를 명시적으로 호출하지 않아도 DB에 반영됩니다.
         return new TransactionResponseDto(transaction, category.getName());
+    }
+
+    // ★ 2. 삭제 메서드 (새로 추가됨!)
+    @Transactional
+    public void deleteTransaction(Long userId, Long transactionId) {
+        // 삭제할 내역이 본인 소유인지 검증 후 조회
+        Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TRANSACTION_NOT_FOUND));
+
+        transactionRepository.delete(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionResponseDto> getTransactions(Long userId) {
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByTransactionDateDesc(userId);
+
+        Map<Long, String> categoryNameMap = categoryRepository.findByUserId(userId).stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        return transactions.stream()
+                .map(t -> new TransactionResponseDto(
+                        t,
+                        categoryNameMap.getOrDefault(t.getCategoryId(), "미분류")
+                ))
+                .collect(Collectors.toList());
     }
 }

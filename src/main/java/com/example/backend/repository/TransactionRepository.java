@@ -50,4 +50,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("userId") Long userId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    List<Transaction> findByUserIdOrderByTransactionDateDesc(Long userId);
 }

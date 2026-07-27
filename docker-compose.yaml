@@ -2,46 +2,42 @@ services:
   db:
     image: mysql:8.0
     container_name: moneylog-db
-    restart: always
-    command:
-      --performance-schema=OFF
-      --innodb-buffer-pool-size=128M
     environment:
       MYSQL_DATABASE: moneylog
-      MYSQL_USER: moneylog_user
-      MYSQL_PASSWORD: moneylog_password
-      MYSQL_ROOT_PASSWORD: root_password
-    ports:
-      - "3306:3306"
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      - db-data:/var/lib/mysql          # 데이터 영속화 (컨테이너 지워도 DB 유지)
+    healthcheck:                         # DB가 완전히 뜬 뒤에 app을 붙이기 위함
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    deploy:
-      resources:
-        limits:
-          memory: 350M
+    networks:
+      - moneylog-net
 
-  backend:
-    build: .
-    container_name: moneylog-backend
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - JWT_SECRET=${JWT_SECRET}
+  app:
+    image: ghcr.io/${GH_OWNER}/moneylog:latest  # CD가 push한 이미지 (로컬 테스트 땐 build 사용)
+    build: .                                     # 로컬에선 현재 Dockerfile로 빌드
+    container_name: moneylog-app
     depends_on:
       db:
-        condition: service_healthy
-
-    deploy:
-      resources:
-        limits:
-          memory: 450M
+        condition: service_healthy               # db가 healthy가 되면 시작
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # 앱은 서비스 이름 'db'로 접속한다 (같은 네트워크 안이라 가능)
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/moneylog?serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}                  # 시크릿은 .env / GitHub Secrets에서 주입
+    ports:
+      - "8080:8080"                              # 호스트:8080 → 컨테이너:8080
+    networks:
+      - moneylog-net
 
 volumes:
-  mysql_data:
+  db-data:
+
+networks:
+  moneylog-net:

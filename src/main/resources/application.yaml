@@ -1,6 +1,13 @@
+# ==========================================
+# 1. 공통 & 로컬(기본) 설정 (H2 사용)
+# ==========================================
 spring:
   application:
     name: backend
+
+  # 기본 프로필 지정 (아무 설정 안 하고 띄우면 local로 동작)
+  profiles:
+    active: local
 
   h2:
     console:
@@ -15,22 +22,47 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create # 👈 실행될 때마다 테이블을 새로 만듦 (개발/테스트 단계용)
-    show-sql: true       # 👈 실행되는 SQL 쿼리를 콘솔에 출력
+      ddl-auto: create
+    show-sql: true
     properties:
       hibernate:
-        format_sql: true # 👈 출력되는 SQL 쿼리를 보기 좋게 정렬
+        format_sql: true
     defer-datasource-initialization: true
 
-# 🔑 JWT 설정 추가 (JwtProvider에서 사용하는 키 이름과 맞춰주세요)
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 86400000 # 토큰 만료 시간 (예: 24시간 = 86400000 ms)
+  expiration: 86400000
 
-  springdoc:
-    swagger-ui:
-      path: /swagger-ui.html
-      disable-swagger-default-url: true
-      display-request-duration: true
-    api-docs:
-      path: /v3/api-docs
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    display-request-duration: true
+  api-docs:
+    path: /v3/api-docs
+
+---
+# ==========================================
+# 2. EC2/Docker 배포용 설정 (prod 프로필 전용)
+# ==========================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # H2 콘솔 끄기
+  h2:
+    console:
+      enabled: false
+
+  # MySQL 설정 (환경변수가 없으면 기본값으로 docker-compose 서비스명 연결)
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://moneylog-db:3306/moneylog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:moneylog_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:moneylog_password}
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # prod 환경에서는 DB 안 날아가게 update 설정!
+    show-sql: false

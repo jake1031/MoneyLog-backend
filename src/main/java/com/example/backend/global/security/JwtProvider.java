@@ -51,13 +51,14 @@ public class JwtProvider {
         return new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
     }
 
-    public String createAccessToken(Long userId) {
+    public String createAccessToken(Long userId, String name) {
         long validityInMilliseconds = 3600000; // 1시간 (필요 시 조절)
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
+                .claim("name", name)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)

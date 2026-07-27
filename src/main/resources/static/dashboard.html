@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyLog - 가계부 대시보드</title>
+    <!-- 분리한 CSS 경로 연결 -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- 헤더 -->
+    <div class="header">
+        <h1>💸 <span id="userName">사용자</span>님의 MoneyLog 대시보드</h1>
+        <button class="btn-logout" onclick="handleLogout()">로그아웃</button>
+    </div>
+
+    <!-- 이번 달 요약 -->
+    <div class="summary-grid">
+        <div class="card">
+            <p>총 수입</p>
+            <h2 id="totalIncome" style="color: #16a34a;">+ 0 원</h2>
+        </div>
+        <div class="card">
+            <p>총 지출</p>
+            <h2 id="totalExpense" style="color: #dc2626;">- 0 원</h2>
+        </div>
+        <div class="card">
+            <p>잔액</p>
+            <h2 id="totalBalance">0 원</h2>
+        </div>
+    </div>
+
+    <!-- 버튼 모음 -->
+    <div class="action-bar">
+        <button class="btn-action btn-category" onclick="openModal('categoryModal')">+ 카테고리 추가</button>
+        <button class="btn-action btn-transaction" onclick="openTransactionModalForCreate()">+ 내역 추가</button>
+    </div>
+
+    <!-- 최근 거래 내역 -->
+    <div class="section">
+        <div class="section-title">거래 내역 목록</div>
+        <table>
+            <thead>
+            <tr>
+                <th>날짜</th>
+                <th>유형</th>
+                <th>카테고리</th>
+                <th>내용</th>
+                <th>금액</th>
+                <th>관리</th>
+            </tr>
+            </thead>
+            <tbody id="transactionTableBody">
+            <tr><td colspan="6" class="empty-state">내역을 불러오는 중입니다...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 1. 카테고리 등록 모달 -->
+<div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+        <div class="modal-title">새 카테고리 추가</div>
+        <form onsubmit="handleCreateCategory(event)">
+            <div class="form-group">
+                <label>카테고리 이름</label>
+                <input type="text" id="categoryName" placeholder="예: 식비, 월급, 교통비" required>
+            </div>
+            <div class="form-group">
+                <label>유형</label>
+                <select id="categoryType" required>
+                    <option value="EXPENSE">지출</option>
+                    <option value="INCOME">수입</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeModal('categoryModal')">취소</button>
+                <button type="submit" class="btn-submit">저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 2. 트랜잭션 등록/수정 모달 -->
+<div class="modal-overlay" id="transactionModal">
+    <div class="modal">
+        <div class="modal-title" id="transactionModalTitle">새 내역 추가</div>
+        <form onsubmit="handleSaveTransaction(event)">
+            <div class="form-group">
+                <label>유형</label>
+                <select id="transType" onchange="filterCategoryDropdown()" required>
+                    <option value="EXPENSE">지출</option>
+                    <option value="INCOME">수입</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>카테고리 선택</label>
+                <select id="transCategory" required>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>금액</label>
+                <input type="number" id="transAmount" placeholder="0" min="1" required>
+            </div>
+            <div class="form-group">
+                <label>날짜</label>
+                <input type="date" id="transDate" required>
+            </div>
+            <div class="form-group">
+                <label>메모</label>
+                <input type="text" id="transDescription" placeholder="상세 내용을 입력하세요">
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeModal('transactionModal')">취소</button>
+                <button type="submit" class="btn-submit" id="transactionSubmitBtn">저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 분리한 JS 경로 연결 -->
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

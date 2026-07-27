@@ -31,6 +31,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/dashboard.html",
+                                "/favicon.ico",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/assets/**",       // 프론트엔드 빌드 결과물 경로 추가
                                 "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
