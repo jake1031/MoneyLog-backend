@@ -26,18 +26,26 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 4) 빌드 + 테스트 (Spring 표준 환경변수 주입)
+      # 4) Secret 존재 여부 체크
+      - name: Secret 존재 여부 체크 (값 출력 안 됨)
+        run: |
+          if [ -z "${{ secrets.JWT_SECRET }}" ]; then
+            echo "❌ JWT_SECRET이 완벽하게 비어있습니다!"
+            exit 1
+          else
+            echo "⭕️ JWT_SECRET이 정상적으로 주입되었습니다!"
+          fi
+
+      # 5) 빌드 + 테스트
       - name: Build & Test
         env:
-          # H2 테스트용 인메모리 설정
           SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb
           SPRING_DATASOURCE_USERNAME: sa
           SPRING_DATASOURCE_PASSWORD: ""
-          # GitHub Secrets에 등록된 값 사용 (없을 경우를 대비해 32바이트 이상의 기본값 부여)
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: ./gradlew clean build
 
-      # 5) 테스트 리포트 보관
+      # 6) 테스트 리포트 보관
       - name: Upload test report
         if: always()
         uses: actions/upload-artifact@v4
