@@ -35,7 +35,8 @@ dependencies {
 
 	// 5. 테스트 전용 의존성
 	testImplementation 'org.springframework.boot:spring-boot-starter-test' // 표준 테스트 스타터 (JPA/Validation 등 포함)
-	testImplementation 'org.springframework.security:spring-security-test' // 시큐리티 테스트 전용
+	testImplementation 'org.springframework.security:spring-security-test'
+	runtimeOnly 'com.mysql:mysql-connector-j'// 시큐리티 테스트 전용
 
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'

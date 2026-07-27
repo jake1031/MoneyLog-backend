@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: moneylog-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: moneylog
+      MYSQL_USER: moneylog_user
+      MYSQL_PASSWORD: moneylog_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: moneylog-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JWT_SECRET=moneyLogSecretKeyProject2026MustBeLongEnough32Bytes!
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

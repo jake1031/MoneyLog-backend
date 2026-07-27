@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>MoneyLog - 가계부</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 0 10px; }
+        .box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 6px; }
+        input, select, button { margin: 5px 0; padding: 8px; width: 100%; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<h2>💰 MoneyLog 간이 대시보드</h2>
+
+<!-- 1. 로그인 폼 -->
+<div id="login-section" class="box">
+    <h3>로그인</h3>
+    <input type="email" id="login-email" placeholder="이메일 (예: test@test.com)">
+    <input type="password" id="login-password" placeholder="비밀번호">
+    <button onclick="login()">로그인하기</button>
+</div>
+
+<!-- 2. 메인 서비스 영역 (로그인 후 표시) -->
+<div id="main-section" class="box hidden">
+    <h3>거래 내역 추가</h3>
+    <select id="tx-type">
+        <option value="EXPENSE">지출</option>
+        <option value="INCOME">수입</option>
+    </select>
+    <input type="number" id="tx-amount" placeholder="금액 (원)">
+    <input type="number" id="tx-category" placeholder="카테고리 ID (예: 1)">
+    <input type="text" id="tx-desc" placeholder="내용 (선택)">
+    <input type="date" id="tx-date">
+    <button onclick="createTransaction()">등록하기</button>
+
+    <h3>거래 내역 목록</h3>
+    <button onclick="fetchMonthlyStats()" style="background-color: #007bff;">목록/통계 새로고침</button>
+    <table>
+        <thead>
+        <tr><th>날짜</th><th>유형</th><th>금액</th><th>카테고리</th><th>내용</th></tr>
+        </thead>
+        <tbody id="tx-list"></tbody>
+    </table>
+</div>
+
+<script>
+    let token = localStorage.getItem('accessToken') || '';
+
+    if(token) showMain();
+
+    async function login() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const result = await res.json();
+        if(result.success) {
+            token = result.data.accessToken;
+            localStorage.setItem('accessToken', token);
+            showMain();
+        } else {
+            alert('로그인 실패: ' + result.message);
+        }
+    }
+
+    function showMain() {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('main-section').classList.remove('hidden');
+        document.getElementById('tx-date').valueAsDate = new Date();
+        fetchMonthlyStats();
+    }
+
+    async function createTransaction() {
+        const payload = {
+            type: document.getElementById('tx-type').value,
+            amount: parseInt(document.getElementById('tx-amount').value),
+            categoryId: parseInt(document.getElementById('tx-category').value),
+            description: document.getElementById('tx-desc').value,
+            transactionDate: document.getElementById('tx-date').value
+        };
+        const res = await fetch('/api/transactions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if(result.success) {
+            alert('등록 완료!');
+            fetchMonthlyStats();
+        } else {
+            alert('등록 실패: ' + result.message);
+        }
+    }
+
+    async function fetchMonthlyStats() {
+        const ym = new Date().toISOString().slice(0,7);
+        const res = await fetch(`/api/statistics/monthly?yearMonth=${ym}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const result = await res.json();
+        if(result.success) {
+            const tbody = document.getElementById('tx-list');
+            tbody.innerHTML = '';
+            // 간이 목록 표출
+            if(result.data.categoryStats) {
+                result.data.categoryStats.forEach(item => {
+                    tbody.innerHTML += `<tr><td>${ym}</td><td>-</td><td>${item.amount}원</td><td>${item.categoryName}</td><td>${item.percentage}%</td></tr>`;
+                });
+            }
+        }
+    }
+</script>
+</body>
+</html>
