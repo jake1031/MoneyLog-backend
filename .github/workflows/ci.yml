@@ -34,7 +34,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: sa
           SPRING_DATASOURCE_PASSWORD: ""
           # GitHub Secrets에 등록된 값 사용 (없을 경우를 대비해 32바이트 이상의 기본값 부여)
-          JWT_SECRET: ${{ secrets.JWT_SECRET || 'moneylog-jwt-secret-key-for-test-environment-must-be-very-long-32bytes' }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: ./gradlew clean build
 
       # 5) 테스트 리포트 보관
