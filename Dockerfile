@@ -1,10 +1,10 @@
 FROM amazoncorretto:17-alpine
 WORKDIR /app
 
-# 맥북에서 빌드된 jar 파일을 복사
-COPY build/libs/*-SNAPSHOT.jar app.jar
+# 정확한 jar 파일 하나만 지정해서 복사
+COPY build/libs/MoneyLog-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
-# 메모리 폭주 방지(-Xmx512m) 옵션 포함해서 실행
-ENTRYPOINT ["java", "-Xms256m", "-Xmx512m", "-jar", "app.jar"]
+# Xmx를 300m~384m 정도로 다이어트 + Cgroup 메모리 감지 옵션
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-Xms128m", "-Xmx300m", "-jar", "app.jar"]

@@ -1,10 +1,11 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
     container_name: moneylog-db
     restart: always
+    command:
+      --performance-schema=OFF
+      --innodb-buffer-pool-size=128M
     environment:
       MYSQL_DATABASE: moneylog
       MYSQL_USER: moneylog_user
@@ -19,6 +20,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 350M
 
   backend:
     build: .
@@ -32,6 +37,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+    deploy:
+      resources:
+        limits:
+          memory: 450M
 
 volumes:
   mysql_data:
