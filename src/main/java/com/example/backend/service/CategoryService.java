@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true) // 기본적으로 읽기 전용으로 설정하여 조회 성능 최적화
 public class CategoryService {
 
+    private static final Long SYSTEM_USER_ID = 0L;
     private final CategoryRepository categoryRepository;
 
     public CategoryService(CategoryRepository categoryRepository) {
@@ -40,7 +41,7 @@ public class CategoryService {
      * 2. 특정 유저의 카테고리 전체 목록 조회
      */
     public List<CategoryResponseDto> getCategories(Long userId) {
-        return categoryRepository.findByUserId(userId)
+        return categoryRepository.findByUserIdOrUserId(userId, SYSTEM_USER_ID)
                 .stream()
                 .map(CategoryResponseDto::new)
                 .collect(Collectors.toList());
