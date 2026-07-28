@@ -5,6 +5,8 @@ import com.example.backend.dto.SignUpRequestDto;
 import com.example.backend.dto.TokenResponseDto;
 import com.example.backend.dto.UserResponseDto;
 import com.example.backend.entity.User;
+import com.example.backend.global.common.exception.CustomException;
+import com.example.backend.global.common.exception.ErrorCode;
 import com.example.backend.global.security.JwtProvider;
 import com.example.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,11 +49,11 @@ public class AuthService {
     public TokenResponseDto login(LoginRequestDto requestDto) {
         // 1. 이메일로 유저 조회
         User user = userRepository.findByEmail(requestDto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 일치하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_CREDENTIALS));
 
         // 2. 비밀번호 검증
         if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         // 3. JWT 토큰 생성 및 반환
