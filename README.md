@@ -28,3 +28,14 @@
 - [x] **월별 통계 API 구현:** 인증된 사용자의 특정 연월(Year-Month) 기준 총수입, 총지출, 잔액 합계 조회 기능 완성
 - [x] **API 응답 표준화 및 문서화:** `{success, code, message, data}` 형태의 공통 응답 봉투(Envelope) 적용, Swagger UI에 JWT 인증(Authorize) 버튼 연동
 - [x] **보안 강화 및 설정 정리:** `dotenv-java`를 도입하여 JWT Secret Key를 `.env` 파일로 분리 및 `.gitignore` 적용, 불필요해진 더미 데이터용 `data.sql` 파일 삭제
+
+---
+
+### 🟢 4일차: CI/CD 파이프라인 구축 및 AWS EC2 자동 배포
+- [x] **Docker 컨테이너화:** Multi-stage build를 적용한 `Dockerfile` 작성 및 GHCR(GitHub Container Registry) 빌드/푸시 체계 구축
+- [x] **GitHub Actions 파이프라인 세팅:** `.github/workflows/ci-cd.yml` 작성으로 Main 브랜치 Push 시 자동 빌드 및 배포 자동화
+- [x] **AWS EC2 환경 구축:** EC2 인스턴스 생성 및 Docker Runtime 세팅, 애플리케이션 자동 실행 스크립트 작성
+- [x] **트러블슈팅 및 환경변수/네트워크 문제 해결:**
+  - **GitHub Secrets 포맷팅 오류:** Secret Value 내 `KEY=VALUE` 형식이 아닌 Pure Value 형태 매핑으로 환경변수 주입 에러 해결
+  - **SSH 타임아웃 (`dial tcp: i/o timeout`):** AWS Security Group(보안 그룹) 인바운드 규칙에 SSH(22번 포트) 허용 범위(`0.0.0.0/0`)를 추가하여 CD 단계 배포 연결 성공
+  - **SSH Key 보안 조치:** 노출 위험이 있던 Private Key 재발급 및 Secrets/EC2 서버 교체 적용
