@@ -301,7 +301,7 @@ async function openCategoryManageModal() {
     openModal('categoryManageModal');
 
     // 본인이 만든 커스텀 카테고리만 조회하는 API (또는 전체 카테고리 중 userId != 0 필터링)
-    const response = await fetch('/api/v1/categories/my', { ... });
+    const response = await fetch('/api/categories/my', { ... });
     const categories = await response.json();
 
     const tbody = document.getElementById('myCategoryTableBody');
@@ -335,7 +335,7 @@ async function handleUpdateCategory(event) {
     const name = document.getElementById('editCategoryName').value;
     const type = document.getElementById('editCategoryType').value;
 
-    const response = await fetch(`/api/v1/categories/${id}`, {
+    const response = await fetch(`/api/categories/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, type })
@@ -350,7 +350,7 @@ async function handleUpdateCategory(event) {
 async function handleDeleteCategory(id) {
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
-    const response = await fetch(`/api/v1/categories/${id}`, {
+    const response = await fetch(`/api/categories/${id}`, {
         method: 'DELETE'
     });
 
