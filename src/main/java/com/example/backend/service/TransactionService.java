@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class TransactionService {
 
+    private static final Long SYSTEM_USER_ID = 0L;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
@@ -92,7 +93,7 @@ public class TransactionService {
     public List<TransactionResponseDto> getTransactions(Long userId) {
         List<Transaction> transactions = transactionRepository.findByUserIdOrderByTransactionDateDesc(userId);
 
-        Map<Long, String> categoryNameMap = categoryRepository.findByUserId(userId).stream()
+        Map<Long, String> categoryNameMap = categoryRepository.findByUserIdOrUserId(userId, SYSTEM_USER_ID).stream()
                 .collect(Collectors.toMap(Category::getId, Category::getName));
 
         return transactions.stream()
