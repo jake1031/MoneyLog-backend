@@ -27,7 +27,7 @@ function setUserNameFromJwt(token) {
         );
 
         const payload = JSON.parse(jsonPayload);
-        const name = payload.name || '사용자';
+        const name = payload.name || payload.nickname || payload.sub || '사용자';
         document.getElementById('userName').textContent = name;
     } catch (e) {
         console.error('JWT 파싱 실패:', e);
@@ -41,6 +41,7 @@ function getAuthHeaders() {
     };
 }
 
+// 1. 전체 카테고리 조회 (기본 0L + 내 커스텀)
 async function loadCategories() {
     try {
         const res = await fetch('/api/categories', { headers: getAuthHeaders() });
@@ -53,6 +54,7 @@ async function loadCategories() {
     }
 }
 
+// 2. 카테고리 생성 (POST)
 async function handleCreateCategory(e) {
     e.preventDefault();
     const name = document.getElementById('categoryName').value;
@@ -70,7 +72,7 @@ async function handleCreateCategory(e) {
             alert('카테고리가 추가되었습니다!');
             closeModal('categoryModal');
             document.getElementById('categoryName').value = '';
-            loadCategories();
+            await loadCategories();
         } else {
             alert(result.message || '카테고리 추가 실패');
         }
@@ -78,6 +80,96 @@ async function handleCreateCategory(e) {
         alert('서버 통신 오류가 발생했습니다.');
     }
 }
+
+// 3. 내 카테고리 관리 모달 열기 (커스텀 카테고리만 필터링 출력)
+async function openCategoryManageModal() {
+    openModal('categoryManageModal');
+
+    // 최신 카테고리 상태 반영
+    await loadCategories();
+
+    // 기본 카테고리(0L)를 제외하고 직접 만든 카테고리만 필터링
+    // (DTO에 isSystem 속성이 있으면 !cat.isSystem, 없으면 userId !== 0 사용)
+    const myCategories = categories.filter(cat => !cat.isSystem && cat.userId !== 0);
+
+    const tbody = document.getElementById('myCategoryTableBody');
+    if (!myCategories || myCategories.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="empty-state">등록된 커스텀 카테고리가 없습니다.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = myCategories.map(cat => `
+        <tr>
+            <td style="padding: 8px;">${cat.name}</td>
+            <td style="padding: 8px;">${cat.type === 'EXPENSE' ? '지출' : '수입'}</td>
+            <td style="padding: 8px; text-align: right;">
+                <button class="btn-edit" type="button" onclick="openCategoryEditModal(${cat.id}, '${cat.name}', '${cat.type}')">수정</button>
+                <button class="btn-delete" type="button" onclick="handleDeleteCategory(${cat.id})">삭제</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// (UI 헬퍼) 수정 모달 값 세팅
+function openCategoryEditModal(id, name, type) {
+    document.getElementById('editCategoryId').value = id;
+    document.getElementById('editCategoryName').value = name;
+    document.getElementById('editCategoryType').value = type;
+    openModal('categoryEditModal');
+}
+
+// 4. 카테고리 수정 (PUT)
+async function handleUpdateCategory(event) {
+    event.preventDefault();
+    const id = document.getElementById('editCategoryId').value;
+    const name = document.getElementById('editCategoryName').value;
+    const type = document.getElementById('editCategoryType').value;
+
+    try {
+        const response = await fetch(`/api/categories/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ name, type })
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            alert('카테고리가 수정되었습니다.');
+            closeModal('categoryEditModal');
+            await openCategoryManageModal(); // 관리 목록 갱신
+        } else {
+            alert(result.message || '수정 실패');
+        }
+    } catch (err) {
+        alert('서버 통신 오류가 발생했습니다.');
+    }
+}
+
+// 5. 카테고리 삭제 (DELETE)
+async function handleDeleteCategory(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+        const response = await fetch(`/api/categories/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            alert('삭제되었습니다.');
+            await openCategoryManageModal(); // 관리 목록 갱신
+        } else {
+            alert(result.message || '삭제 실패');
+        }
+    } catch (err) {
+        alert('서버 통신 오류가 발생했습니다.');
+    }
+}
+
+// ==========================================
+// 거래 내역 (Transaction) 기능
+// ==========================================
 
 function openTransactionModalForCreate() {
     if (categories.length === 0) {
@@ -250,6 +342,9 @@ function renderTransactions(list) {
 
     if (!list || list.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="empty-state">등록된 내역이 없습니다. 첫 내역을 추가해보세요!</td></tr>';
+        document.getElementById('totalIncome').textContent = '+ 0 원';
+        document.getElementById('totalExpense').textContent = '- 0 원';
+        document.getElementById('totalBalance').textContent = '0 원';
         return;
     }
 
@@ -295,66 +390,4 @@ function handleLogout() {
     localStorage.removeItem('accessToken');
     alert('로그아웃 되었습니다.');
     window.location.href = '/index.html';
-}
-
-async function openCategoryManageModal() {
-    openModal('categoryManageModal');
-
-    // 본인이 만든 커스텀 카테고리만 조회하는 API (또는 전체 카테고리 중 userId != 0 필터링)
-    const response = await fetch('/api/categories/my', { ... });
-    const categories = await response.json();
-
-    const tbody = document.getElementById('myCategoryTableBody');
-    if (categories.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="empty-state">등록된 커스텀 카테고리가 없습니다.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = categories.map(cat => `
-        <tr>
-            <td style="padding: 8px;">${cat.name}</td>
-            <td style="padding: 8px;">${cat.type === 'EXPENSE' ? '지출' : '수입'}</td>
-            <td style="padding: 8px; text-align: right;">
-                <button onclick="openCategoryEditModal(${cat.id}, '${cat.name}', '${cat.type}')">수정</button>
-                <button onclick="handleDeleteCategory(${cat.id})">삭제</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function openCategoryEditModal(id, name, type) {
-    document.getElementById('editCategoryId').value = id;
-    document.getElementById('editCategoryName').value = name;
-    document.getElementById('editCategoryType').value = type;
-    openModal('categoryEditModal');
-}
-
-async function handleUpdateCategory(event) {
-    event.preventDefault();
-    const id = document.getElementById('editCategoryId').value;
-    const name = document.getElementById('editCategoryName').value;
-    const type = document.getElementById('editCategoryType').value;
-
-    const response = await fetch(`/api/categories/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, type })
-    });
-
-    if (response.ok) {
-        closeModal('categoryEditModal');
-        openCategoryManageModal(); // 목록 갱신
-    }
-}
-
-async function handleDeleteCategory(id) {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-
-    const response = await fetch(`/api/categories/${id}`, {
-        method: 'DELETE'
-    });
-
-    if (response.ok) {
-        openCategoryManageModal(); // 삭제 후 목록 갱신
-    }
 }
