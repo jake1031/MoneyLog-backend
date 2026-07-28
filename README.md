@@ -15,7 +15,7 @@
 
 - 🌐 **배포 URL (EC2)**: http://98.94.87.21:8080/
 - 📖 **API 문서 (Swagger)**: http://98.94.87.21:8080/swagger-ui/index.html
-- 📐 **요구사항 및 설계 문서**: [`docs/architecture.md`](docs/architecture.md)
+- 📐 **요구사항 및 설계 문서**: [`docs/Architecture.md`](docs/architecture.md)
 
 ---
 
