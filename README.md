@@ -81,6 +81,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
+```
 
 ## 📅 개발 과정 및 회고 (Retrospective)
 
