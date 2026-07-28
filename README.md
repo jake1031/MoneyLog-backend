@@ -37,11 +37,10 @@
 |------|------|
 | **Language & Framework** | Java 17, Spring Boot 3.x, Spring Web, Spring Data JPA |
 | **Security** | Spring Security, JWT (jjwt), BCrypt |
-| **Database** | H2 Database (In-Memory / File) |
+| **Database** | H2 (로컬 개발용) / MySQL 8 (운영 환경용) |
 | **API Docs** | springdoc-openapi (Swagger UI) |
 | **DevOps & CI/CD** | Docker, GHCR, GitHub Actions, AWS EC2 |
 | **Environment** | dotenv-java (`.env` 환경변수 관리) |
-
 ---
 
 ## 🗄️ ERD (Entity Relationship Diagram)
