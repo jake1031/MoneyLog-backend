@@ -8,6 +8,9 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
+    // 내 데이터만 조회
+    List<Category> findByUserId(Long userId);
+
     // user_id가 내 ID이거나, SYSTEM_ID(0L)인 데이터를 모두 조회
     List<Category> findByUserIdOrUserId(Long userId, Long systemUserId);
 

@@ -296,3 +296,65 @@ function handleLogout() {
     alert('로그아웃 되었습니다.');
     window.location.href = '/index.html';
 }
+
+async function openCategoryManageModal() {
+    openModal('categoryManageModal');
+
+    // 본인이 만든 커스텀 카테고리만 조회하는 API (또는 전체 카테고리 중 userId != 0 필터링)
+    const response = await fetch('/api/v1/categories/my', { ... });
+    const categories = await response.json();
+
+    const tbody = document.getElementById('myCategoryTableBody');
+    if (categories.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="empty-state">등록된 커스텀 카테고리가 없습니다.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = categories.map(cat => `
+        <tr>
+            <td style="padding: 8px;">${cat.name}</td>
+            <td style="padding: 8px;">${cat.type === 'EXPENSE' ? '지출' : '수입'}</td>
+            <td style="padding: 8px; text-align: right;">
+                <button onclick="openCategoryEditModal(${cat.id}, '${cat.name}', '${cat.type}')">수정</button>
+                <button onclick="handleDeleteCategory(${cat.id})">삭제</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function openCategoryEditModal(id, name, type) {
+    document.getElementById('editCategoryId').value = id;
+    document.getElementById('editCategoryName').value = name;
+    document.getElementById('editCategoryType').value = type;
+    openModal('categoryEditModal');
+}
+
+async function handleUpdateCategory(event) {
+    event.preventDefault();
+    const id = document.getElementById('editCategoryId').value;
+    const name = document.getElementById('editCategoryName').value;
+    const type = document.getElementById('editCategoryType').value;
+
+    const response = await fetch(`/api/v1/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, type })
+    });
+
+    if (response.ok) {
+        closeModal('categoryEditModal');
+        openCategoryManageModal(); // 목록 갱신
+    }
+}
+
+async function handleDeleteCategory(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    const response = await fetch(`/api/v1/categories/${id}`, {
+        method: 'DELETE'
+    });
+
+    if (response.ok) {
+        openCategoryManageModal(); // 삭제 후 목록 갱신
+    }
+}
