@@ -22,12 +22,12 @@ public class Transaction {
 
     // 기록한 사용자 (FK -> users.id, NOT NULL)
     @NotNull
-    @JoinColumn(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
     // 분류 카테고리 (FK -> categories.id, NOT NULL)
     @NotNull
-    @JoinColumn(name = "category_id", nullable = false)
+    @Column(name = "category_id", nullable = false)
     private Long categoryId;
 
     // 수입/지출 구분 (ENUM('INCOME', 'EXPENSE'), NOT NULL)

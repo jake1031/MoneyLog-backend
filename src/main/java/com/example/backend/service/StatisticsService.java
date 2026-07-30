@@ -42,8 +42,8 @@ public class StatisticsService {
         List<Object[]> categoryGroupedList = transactionRepository.sumExpenseByCategoryIdGrouped(
                 userId, startDate, endDate);
 
-        // 카테고리 이름 조회를 위해 카테고리 전체 Map 변환
-        Map<Long, String> categoryMap = categoryRepository.findAll().stream()
+        // 카테고리 이름 조회를 위해 카테고리 Map 변환
+        Map<Long, String> categoryMap = categoryRepository.findByUserId(userId).stream()
                 .collect(Collectors.toMap(Category::getId, Category::getName));
 
         List<CategoryStatDto> categoryStats = new ArrayList<>();

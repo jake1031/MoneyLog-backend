@@ -3,6 +3,8 @@ package com.example.backend.service;
 import com.example.backend.dto.CategoryRequestDto;
 import com.example.backend.dto.CategoryResponseDto;
 import com.example.backend.entity.Category;
+import com.example.backend.global.common.exception.CustomException;
+import com.example.backend.global.common.exception.ErrorCode;
 import com.example.backend.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +56,7 @@ public class CategoryService {
     public CategoryResponseDto updateCategory(Long userId, Long categoryId, CategoryRequestDto requestDto) {
         // 본인의 카테고리가 맞는지 검증하며 조회
         Category category = categoryRepository.findByIdAndUserId(categoryId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없거나 접근 권한이 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // 엔티티 필드 수정 -> 트랜잭션 종료 시점에 변경 감지로 UPDATE 쿼리 자동 실행
         category.update(requestDto.getName(), requestDto.getType());
@@ -68,7 +70,7 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long userId, Long categoryId) {
         Category category = categoryRepository.findByIdAndUserId(categoryId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없거나 접근 권한이 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
         categoryRepository.delete(category);
     }

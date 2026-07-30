@@ -33,7 +33,7 @@ public class AuthService {
     public UserResponseDto signUp(SignUpRequestDto requestDto) {
         // 1. 이메일 중복 검증
         if (userRepository.existsByEmail(requestDto.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         // 2. 비밀번호 암호화
